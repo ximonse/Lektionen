@@ -74,10 +74,10 @@ export default function App() {
       formData.append('model', 'whisper-1');
       formData.append('language', 'sv');
 
-      const response = await fetch('https://api.openai.com/v1/audio/transcriptions', {
+      const response = await fetch('/api/whisper', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${openaiApiKey}`
+          'x-api-key': openaiApiKey
         },
         body: formData
       });
@@ -103,40 +103,14 @@ export default function App() {
     setIsCleaning(true);
 
     try {
-      const response = await fetch('https://api.anthropic.com/v1/messages', {
+      const response = await fetch('/api/claude', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'x-api-key': anthropicApiKey,
-          'anthropic-version': '2023-06-01'
         },
         body: JSON.stringify({
-          model: 'claude-sonnet-4-20250514',
-          max_tokens: 3000,
-          messages: [
-            {
-              role: 'user',
-              content: `Du är en assistent som hjälper lärare att rensa och strukturera sina genomgångar.
-
-Här är en transkribering av en lärargenomgång. Skapa en RENSAT och STRUKTURERAD sammanfattning som ENDAST innehåller:
-- Vad som ska hända under lektionen/arbetspasset
-- Arbetsuppgifter och instruktioner
-- Ämnesinnehåll och förklaringar
-- Räknemetoder och exempel
-
-TA BORT:
-- Kommentarer till enskilda elever (t.ex. "David, var tyst", "Emma, kan du sätta dig")
-- Bakgrundskommentarer och irrelevanta kommentarer
-- Organisatoriska avbrott som inte är viktiga för innehållet
-- Upprepningar av samma information
-- Transkriberingfel och ofullständiga meningar
-
-Formatera resultatet tydligt med rubriker. Skriv på svenska.
-
-TRANSKRIBERING:
-${text}`
-            }
-          ]
+          text: text,
+          apiKey: anthropicApiKey
         })
       });
 
