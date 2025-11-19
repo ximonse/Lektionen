@@ -69,17 +69,27 @@ export default function App() {
     setTranscription('');
 
     try {
-      const formData = new FormData();
-      formData.append('file', audioBlob, 'recording.webm');
-      formData.append('model', 'whisper-1');
-      formData.append('language', 'sv');
+      const arrayBuffer = await audioBlob.arrayBuffer();
+      let binary = '';
+      const bytes = new Uint8Array(arrayBuffer);
+      const chunkSize = 0x8000;
+      for (let i = 0; i < bytes.length; i += chunkSize) {
+        const chunk = bytes.subarray(i, i + chunkSize);
+        binary += String.fromCharCode.apply(null, chunk);
+      }
+      const base64Audio = btoa(binary);
 
       const response = await fetch('/api/whisper', {
         method: 'POST',
         headers: {
+          'Content-Type': 'application/json',
           'x-api-key': openaiApiKey
         },
-        body: formData
+        body: JSON.stringify({
+          audio: base64Audio,
+          mimeType: audioBlob.type || 'audio/webm',
+          fileName: 'recording.webm'
+        })
       });
 
       if (!response.ok) {
